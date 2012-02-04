@@ -1,9 +1,10 @@
 #!/usr/bin/python
+# taken from: https://code.google.com/p/pyrocket/
+# where it is licensed under the GNU GPLv3 (c)
 
 import usb
 
 class RocketManager:
-
 	vendor_product_ids = [(0x1941, 0x8021), (0x0a81, 0x0701), (0x0a81, 0xff01), (0x1130, 0x0202), (0x2123,0x1010)]
 	launcher_types = ["Original", "Webcam", "Wireless", "Striker II", "OIC Webcam"]
 	housing_colors = ["green", "blue", "silver", "black", "gray"]
