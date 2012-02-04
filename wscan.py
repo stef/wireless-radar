@@ -21,13 +21,16 @@ VMAX=280
 blocks = u' ▁▂▃▄▅▆▇██'
 
 class Scanner():
-    def __init__(self, wireless, x=0, y=0):
+    def __init__(self, wireless, x=0, y=0, rm=True):
         self.w=Wireless(wireless)
-        self.rm=RocketManager()
-        self.rm.acquire_devices()
+        if rm: self.init_launcher()
         self.x=x
         self.y=y
         self.aps={}
+
+    def init_launcher(self):
+        self.rm=RocketManager()
+        self.rm.acquire_devices()
 
     def step(self,dir,steps=1):
         for _ in xrange(steps):
@@ -122,6 +125,11 @@ class Scanner():
                 radar[int(item[2]/((HMAX+1.0)/20))][0]+=item[1]
                 radar[int(item[2]/((HMAX+1.0)/20))][1]+=1
             tmp=[x[0]/x[1] if x[1] else None for x in radar]
+            #if len([x for x in tmp if x])>10:
+            #    print "|%s| %4s %3s %s %s %s %s" % (' '*20, ap[4], ap[5], ap[2][:19], ap[0], ap[3], ap[1])
+            #else:
+            #    tmp=[y or min([x for x in tmp if x])-((max([x for x in tmp if x])-min([x for x in tmp if x]))/8)-1 for y in tmp]
+            #    print "|%s| %4s %3s %s %s %s %s" % (s.spark(tmp).encode('utf8'), ap[4], ap[5], ap[2][:19], ap[0], ap[3], ap[1])
             tmp=[y or min([x for x in tmp if x])-((max([x for x in tmp if x])-min([x for x in tmp if x]))/8)-1 for y in tmp]
             print "|%s| %4s %3s %s %s %s %s" % (s.spark(tmp).encode('utf8'), ap[4], ap[5], ap[2][:19], ap[0], ap[3], ap[1])
 
@@ -150,18 +158,20 @@ class Scanner():
         return line
 
 if __name__ == "__main__":
-    s=Scanner(interface)
     if len(sys.argv)>1:
         if sys.argv[1]=='reset':
+            s=Scanner(interface)
             s.home()
         elif sys.argv[1]=='load':
+            s=Scanner(interface,rm=False)
             s.load(sys.stdin)
             s.stats()
         else:
             # show rssi graph of AP
+            s=Scanner(interface)
             cb=partial(s.apRSSI,sys.argv[1])
             s.fasth(c=5, steps=100, cb=cb, sweeps=2)
     else:
-        s.fasth(c=5, steps=100)
-        s.stats()
+        s=Scanner(interface)
+        s.fasth(c=5, steps=100, sweeps=2)
 
