@@ -5,6 +5,7 @@ wireless-radar comes with a few tools:
  - mrssi a simple RSSI sensor locking onto a MAC for physically locating the device
  - wscan a direction-finder using a directional antenna mounted on a usb rocket launcher
  - bprox a Bluetooth device discoverer
+ - rfdiff to diff the outputs of wprox scans
 
 Since wireless-radar tools involve manipulating network devices and
 setting promiscuous mode, these need to be either run as root, or you
@@ -272,3 +273,8 @@ the json representation of an SDP query of the device.
 python bprox.py
 01:23:45:67:89:ab -52 5a0204 'bluetooth enabled phone' phone object transfer service|networking service|capturing service|telephony service [{'protocol': 'L2CAP', 'name': 'AV remote control', 'service-id': None, 'profiles': [('110E', 256)], 'service-classes': ['110C'], 'host': '01:23:45:67:89:ab', 'provider': 'SAMSUNG', 'port': 23, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Voice GW', 'service-id': None, 'profiles': [('00001108', 257)], 'service-classes': ['1112', '1203'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 2, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Serial Port', 'service-id': None, 'profiles': [], 'service-classes': ['1101'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 4, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Dial-up networking', 'service-id': None, 'profiles': [('00001103', 256)], 'service-classes': ['00001103'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 1, 'description': None}, {'protocol': 'L2CAP', 'name': 'Audio/Video Service', 'service-id': None, 'profiles': [('110D', 258)], 'service-classes': ['110A'], 'host': '01:23:45:67:89:ab', 'provider': 'SAMSUNG', 'port': 25, 'description': None}, {'protocol': 'RFCOMM', 'name': 'SIM Access', 'service-id': None, 'profiles': [('112D', 258)], 'service-classes': ['112D', '1204'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 3, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Voice gateway', 'service-id': None, 'profiles': [('111E', 261)], 'service-classes': ['111F', '1203'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 6, 'description': None}, {'protocol': 'RFCOMM', 'name': 'OPP', 'service-id': None, 'profiles': [('1105', 256)], 'service-classes': ['1105'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 8, 'description': None}, {'protocol': 'RFCOMM', 'name': 'OBEX FileTransfer', 'service-id': None, 'profiles': [('1106', 258)], 'service-classes': ['1106'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 9, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Phonebook Access PSE', 'service-id': None, 'profiles': [('1130', 256)], 'service-classes': ['112F'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 10, 'description': None}]
 ```
+
+## rfdiff
+
+rfdiff takes two output files from wprox and compares them while
+ignoring insignificant differences, see the source.
