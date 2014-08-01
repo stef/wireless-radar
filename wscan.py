@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# (c) 2014, stf - AGPLv3+
 
 from pythonwifi.iwlibs import Wireless
 from datetime import datetime
