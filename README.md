@@ -56,7 +56,7 @@ CL                                ff:ff:ff:ff:ff:ff Samsung Electronics     [3,9
 
 where the first column denotes
  - AP for access points
- - <empty> for associated clients
+ - nothing for associated clients
  - CL for non-associated clients
  - NA for unknown roles
 
