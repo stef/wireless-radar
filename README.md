@@ -6,17 +6,17 @@ wireless-radar comes with a few tools:
  - wscan a direction-finder using a directional antenna mounted on a usb rocket launcher
  - bprox a Bluetooth device discoverer
 
-since this involves manipulating network devices and setting
-promiscous mode, wprox needs to be either run as root, or you can
-create a copy of your python executable and set capabilities to enable
-sniffing for user accounts in your virtual environment:
+Since wireless-radar tools involve manipulating network devices and
+setting promiscuous mode, these need to be either run as root, or you
+can create a copy of your python executable and set capabilities to
+enable sniffing for user accounts in your virtual environment:
 
      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' env/bin/python2
 
 ## wprox
 
 wprox sniffs on every channel as long as no new devices are found for
-a preset amount of time.  wproxy gathers clients trying to discover,
+a preset amount of time. wproxy gathers clients trying to discover,
 connect to, or communicating with APs, and APs advertising themselves
 or communicating with clients. It also collects the ESSIDS of access
 points the clients try to connect to (affects mostly Apple products).
