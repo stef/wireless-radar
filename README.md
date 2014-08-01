@@ -1,10 +1,106 @@
+# wireless-radar
+
+wireless-radar comes with a few tools:
+ - wprox a scanner for detecting/fingerprinting active 802.11 devices
+ - mrssi a simple RSSI sensor locking onto a MAC for physically locating the device
+ - wscan a direction-finder using a directional antenna mounted on a usb rocket launcher
+ - bprox a Bluetooth device discoverer
+
+since this involves manipulating network devices and setting
+promiscous mode, wprox needs to be either run as root, or you can
+create a copy of your python executable and set capabilities to enable
+sniffing for user accounts in your virtual environment:
+
+     setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' env/bin/python2
+
+## wprox
+
+wprox sniffs on every channel as long as no new devices are found for
+a preset amount of time.  wproxy gathers clients trying to discover,
+connect to, or communicating with APs, and APs advertising themselves
+or communicating with clients. It also collects the ESSIDS of access
+points the clients try to connect to (affects mostly Apple products).
+
+Using wprox it is possible to have a more granular look into all
+channels and their users. It allows for selecting a more quiet channel
+for your own network, discovering less congested access points at
+conferences, and generally map the wifi spectrum.
+
+wprox has the following dependencies:
+
+    pip install scapy netaddr git+https://github.com/pingflood/pythonwifi.git
+
+before you run, you must set your wlan device to monitor mode:
+
+    iwconfig wlan0 mode monitor
+
+alternatively you can also create a seperate monitor device using:
+
+    airmon-ng start wlan0
+    ifconfig wlan0 down
+
+you can then run wproxy like this:
+
+    ./wprox.py <device>
+
+replacing <device> with wlan0 or mon0 depending on your setup.
+
+should result in output like this:
+```
+typ AP SSID*                      MAC               vendor                  channels              cnt  max  min  avg  sp rssi   attempts
+AP 'TP-LINK_ffffff'               ff:ff:ff:ff:ff:ff TP-LINK TECHNOLOGIES    [3-7,9,11          ] 3511  -36  -80  -40 44 [███  ]
+                                  ff:ff:ff:ff:ff:ff Apple, Inc.             [6                 ]   15  -73 -100  -84 27 [▊    ] 'TP-LINK_ffffff'
+AP 'WifiZone1234567'              ff:ff:ff:ff:ff:ff Routerboard.com         [11                ]  178  -90  -94  -92  4 [█▌   ]
+CL                                ff:ff:ff:ff:ff:ff Samsung Electronics     [3,9               ]   12  -81  -90  -89  9 [██▋  ]'ap1', ''
+```
+
+where the first column denotes
+ - AP for access points
+ - <empty> for associated clients
+ - CL for non-associated clients
+ - NA for unknown roles
+
+for APs this is followed by the AP ESSID, and then for all device types
+ - the MAC,
+ - the vendor according to the MAC,
+ - a list of channels this device has been observed,
+ - the number of packets counted
+ - strongest signal,
+ - weakest signal,
+ - average signal,
+ - difference between strongest and weakest signal,
+ - 5 char graphical signal strength indicator.
+
+For client devices this is followed by a list of ESSIDs the device
+tried to associate with.
+
+While wprox is running it dumps the found devices to stderr every 1
+second if there's some traffic on the chan. At the end wproxy outputs
+all devices again, but this time to stdout so you can save one copy in
+a file.
+
+## mrssi
+
+mrssi allows you to lock onto one specific MAC address on a specific
+channel and shows you the signal strength with a bargraph and a
+histogram of the signal strength over the last 40 seconds:
+
+```
+./mrssi.py mon0 01:23:45:ff:ff:ff 6
+WARNING: Failed to execute tcpdump. Check it is installed and in the PATH
+WARNING: No route found for IPv6 destination :: (no default route?)
+looking for 01:23:45:ff:ff:ff on mon0 chan: 6 (2.437GHz)
+-75  ████████████▋                           | -79  ▃▃▂▂▂▂▂▁▁▁▁▂▄▄▄▃▄▄▃▆▅▅▄▅▅▂▆▇▅▅▆▅▅▅▄▄▃▂▁▁ -52
+```
+
+## wscan
 run with::
 
-    sudo ./wscan.py | tee logs/home-$(date '+%s').log | ./wscan.py load
+    ./wscan.py | tee logs/home-$(date '+%s').log | ./wscan.py load
 
 or tracking a specific AP:
 
-    sudo ./wscan.py 00:00:00:00:00:00 | tee logs/home-$(date '+%s').log | ./wscan.py load
+    ./wscan.py 00:00:00:00:00:00 | tee logs/home-$(date '+%s').log | ./wscan.py load
 
 this gives you realtime feedback on RSSI strength for a given BSSID.
 
@@ -158,4 +254,21 @@ In any case you get this output, where the colums are the following:
 |▃▃▃▂▃▃▂ ▆▆▆▇▇▇█▆▆▅▃▂| 2900   0 2012-02-04T02:43:23 -85
 |▄▄▃▄▃▃▃   ▄▅▇▆▇▇███▆| 2900   0 2012-02-04T03:17:50 -59
 |  ▃██ ▃▆▆██▆▃▆▃▃▆▆▆▃| 3400   0 2012-02-04T02:49:55 -85
+```
+
+## bprox
+
+bprox listens for bluetooth devices in your vicinity and reports them back.
+bprox depends on pybluez:
+
+    pip install pybluez
+
+the output contains the MAC address, the RSSI, the device class in
+hex, the device name, the device type, the advertised services, and
+the json representation of an SDP query of the device.
+
+
+```
+python bprox.py
+01:23:45:67:89:ab -52 5a0204 'bluetooth enabled phone' phone object transfer service|networking service|capturing service|telephony service [{'protocol': 'L2CAP', 'name': 'AV remote control', 'service-id': None, 'profiles': [('110E', 256)], 'service-classes': ['110C'], 'host': '01:23:45:67:89:ab', 'provider': 'SAMSUNG', 'port': 23, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Voice GW', 'service-id': None, 'profiles': [('00001108', 257)], 'service-classes': ['1112', '1203'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 2, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Serial Port', 'service-id': None, 'profiles': [], 'service-classes': ['1101'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 4, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Dial-up networking', 'service-id': None, 'profiles': [('00001103', 256)], 'service-classes': ['00001103'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 1, 'description': None}, {'protocol': 'L2CAP', 'name': 'Audio/Video Service', 'service-id': None, 'profiles': [('110D', 258)], 'service-classes': ['110A'], 'host': '01:23:45:67:89:ab', 'provider': 'SAMSUNG', 'port': 25, 'description': None}, {'protocol': 'RFCOMM', 'name': 'SIM Access', 'service-id': None, 'profiles': [('112D', 258)], 'service-classes': ['112D', '1204'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 3, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Voice gateway', 'service-id': None, 'profiles': [('111E', 261)], 'service-classes': ['111F', '1203'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 6, 'description': None}, {'protocol': 'RFCOMM', 'name': 'OPP', 'service-id': None, 'profiles': [('1105', 256)], 'service-classes': ['1105'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 8, 'description': None}, {'protocol': 'RFCOMM', 'name': 'OBEX FileTransfer', 'service-id': None, 'profiles': [('1106', 258)], 'service-classes': ['1106'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 9, 'description': None}, {'protocol': 'RFCOMM', 'name': 'Phonebook Access PSE', 'service-id': None, 'profiles': [('1130', 256)], 'service-classes': ['112F'], 'host': '01:23:45:67:89:ab', 'provider': None, 'port': 10, 'description': None}]
 ```
