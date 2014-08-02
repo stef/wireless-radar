@@ -38,7 +38,7 @@ def load(fn):
             mac=line[34:51]
             res[mac] = (mac,                                    # mac
                         line[2:32].strip(),                     # essid
-                        'CL' if line[:2] == '  ' else line[:2], # type
+                        'cl' if line[:2] == '  ' else line[:2], # type
                         stats[:idx].strip(),                    # chans
                         int(stats[idx+2:idx+6].strip()),        # count
                         int(stats[idx+7:idx+11].strip()),       # max
@@ -50,7 +50,7 @@ def load(fn):
     return res
 
 def wskip(rec):
-    return rec[3]>-85
+    return rec[7]>-85
 
 old=load(sys.argv[1])
 new=load(sys.argv[2])
