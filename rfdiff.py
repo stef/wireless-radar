@@ -11,24 +11,6 @@ from datetime import datetime
 import sys
 import netaddr
 
-def getvendor(mac):
-    try:
-        return "[%s]" % (netaddr.OUI(mac[:8].replace(':','-')).registration().org)
-    except netaddr.core.NotRegisteredError:
-        return ''
-
-wmeta=[{'name': 'mac', 'out': getvendor},
-       {'name': 'essid', 'id': True},
-       {'name': 'type'},
-       {'name': 'chans', 'ignore': True},
-       {'name': 'count', 'threshold': 30},
-       {'name': 'avg', 'threshold': 30},
-       {'name': 'max', 'threshold': 30},
-       {'name': 'min', 'threshold': 30},
-       {'name': 'spread', 'ignore': True}, # needs other, can vary 1-2 or even around 50
-       {'name': 'attempts'},
-      ]
-
 def load(fn):
     res={}
     with open(fn,'r') as fd:
@@ -46,11 +28,12 @@ def load(fn):
                         int(stats[idx+17:idx+21].strip()),      # avg
                         int(stats[idx+22:idx+24].strip()),      # spread
                         stats.decode('utf8')[idx+32:].strip(),  # attempts
+                        line
                         )
     return res
 
 def wskip(rec):
-    return rec[7]>-85
+    return rec[7]<-85
 
 old=load(sys.argv[1])
 new=load(sys.argv[2])
@@ -58,24 +41,16 @@ new=load(sys.argv[2])
 # deleted
 deleted=set(old.keys()) - set(new.keys())
 if deleted:
-    rendered = [' '.join([wmeta[i].get('out', str)(old[k][i])
-                         for i in xrange(len(wmeta))])
-                for k in deleted if not wskip(old[k])]
+    rendered = [old[k][-1][:-1] for k in deleted if not wskip(old[k])]
     if rendered:
         print 'gone\t%s' % '\ngone\t'.join(rendered)
 
 # new
 added=set(new.keys()) - set(old.keys())
-try:
-    if added:
-        rendered = [' '.join([wmeta[i].get('out', str)(new[k][i])
-                              for i in xrange(len(wmeta))])
-                    for k in added if not wskip(new[k])]
-        if rendered:
-            print 'new\t%s' % '\nnew\t'.join(rendered)
-except:
-    import code; code.interact(local=locals());
-
+if added:
+    rendered = [new[k][-1][:-1] for k in added if not wskip(new[k])]
+    if rendered:
+        print 'new\t%s' % '\nnew\t'.join(rendered)
 
 # rest
 rest=set(new.keys()) & set(old.keys())
@@ -83,17 +58,18 @@ if rest:
     for k in rest:
         diffs=[]
         id=[]
-        for i, (oldelem, newelem) in enumerate(zip(old[k],new[k])):
-            if 'id' in wmeta[i]:
-                id.append(newelem)
-            if oldelem==newelem: continue
-            if 'ignore' in wmeta[i] and wmeta[i]['ignore']:
-                continue
-            if 'threshold' in wmeta[i]:
-                o=float(oldelem)
-                n=float(newelem)
-                if min((o,n))/max((o,n)) < (wmeta[i]['threshold']+100)/100.0:
-                    continue
-            diffs.append((wmeta[i]['name'],oldelem,newelem))
+        #  mac essid type chans count max min avg spread attempts
+        if old[k][2]=='CL' and new[k][2]=='cl':
+            diffs.append(('connected',old[k][1] or old[k][0],new[k][1] or new[k][0]))
+        elif old[k][2]=='cl' and new[k][2]=='CL':
+            diffs.append(('disconnected',old[k][1] or old[k][0],new[k][1] or new[k][0]))
+        elif old[k][2]=='AP' and new[k][2]=='AP' and old[k][1]!=new[k][1]:
+            diffs.append(('essid',old[k][1] or old[k][0],new[k][1] or new[k][0]))
+        elif old[k][2]!=new[k][2]:
+            diffs.append(('type',old[k][2] or old[k][0],new[k][2] or new[k][0]))
+        o=float(old[k][7])
+        n=float(new[k][7])
+        if min((o,n))/max((o,n)) > 130/100.0:
+            diffs.append(('rssi',old[k][7],new[k][7]))
         if diffs:
-            print '/'.join(x for x in id if x) or k, getvendor(k), "\n\t%s" % '\n\t'.join("%s: %s \t -> \t%s" % data for data in  diffs)
+            print "changed %s\n\t%s" % (new[k][-1][:-1], '\n\t'.join("%s: %s \t -> \t%s" % data for data in  diffs))
