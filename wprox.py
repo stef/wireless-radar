@@ -151,11 +151,11 @@ class ChanSniffer():
                         #print "[add] %s %s\t%s" % (p.addr2.upper(),
                         #                                    repr(p.info),
                         #                                    OUI(p.addr2[:8].replace(':','-')).registration().org)
-                        if not self.peers[p.addr2]['type']:
-                            self.fixtype(p.addr2, 'client',p)
                         self.adddev(p.addr2, p)
                     else:
                         self.addseen(p.addr2, p)
+                    if not self.peers[p.addr2]['type']:
+                        self.fixtype(p.addr2, 'client',p)
                 elif p.subtype == 8: # beacon
                     if p.addr2 not in self.peers:
                         #print "{new} %s %s\t%s" % (p.addr2.upper(),
@@ -166,11 +166,11 @@ class ChanSniffer():
                         #print "{add} %s %s\t%s" % (p.addr2.upper(),
                         #                           repr(p.info),
                         #                           OUI(p.addr2[:8].replace(':','-')).registration().org)
-                        if not self.peers[p.addr2]['type']:
-                            self.fixtype(p.addr2, 'ap',p)
                         self.adddev(p.addr2, p)
                     else:
                         self.addseen(p.addr2, p)
+                    if not self.peers[p.addr2]['type']:
+                        self.fixtype(p.addr2, 'ap',p)
             if p.type == 2:
                 if (p.addr1.lower() not in ['ff:ff:ff:ff:ff:ff',        # broadcast
                                             '01:00:0c:cc:cc:cd',        # PVSTP+ BPDU
