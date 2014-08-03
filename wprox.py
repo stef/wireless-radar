@@ -78,13 +78,13 @@ class ChanSniffer():
     def siglevel(self, packet):
         return -(256-ord(packet.notdecoded[-4:-3]))
 
-    def addseen(self, dev, p):
+    def addseen(self, p):
         try:
-            self.peers[dev]['seen'].append({'chan': chanmap[self.freq[0]+self.freq[2:5]],
+            self.peers[p.addr2]['seen'].append({'chan': chanmap[self.freq[0]+self.freq[2:5]],
                                             'ts': time.time(),
                                             'rssi': self.siglevel(p) if self.siglevel(p)!=-256 else -100})
         except:
-            self.peers[dev]['seen']= [{'chan': chanmap[self.freq[0]+self.freq[2:5]],
+            self.peers[p.addr2]['seen']= [{'chan': chanmap[self.freq[0]+self.freq[2:5]],
                                        'ts': time.time(),
                                        'rssi': self.siglevel(p) if self.siglevel(p)!=-256 else -100}]
 
@@ -102,7 +102,7 @@ class ChanSniffer():
         except KeyError:
             self.peers[p.addr2]['ssids']=[repr(p.info)]
 
-        self.addseen(p.addr2, p)
+        self.addseen(p)
         if self.timeout: self.lastseen=time.time()
 
 
@@ -120,7 +120,7 @@ class ChanSniffer():
         except KeyError:
             self.peers[dev]['peers']=[peer]
 
-        self.addseen(dev, p)
+        self.addseen(p)
         if self.timeout: self.lastseen=time.time()
 
     def guesstype(self, other, p):
@@ -155,7 +155,7 @@ class ChanSniffer():
                             self.fixtype('client',p)
                         self.adddev(p)
                     else:
-                        self.addseen(p.addr2, p)
+                        self.addseen(p)
                 elif p.subtype == 8: # beacon
                     if p.addr2 not in self.peers:
                         #print "{new} %s %s\t%s" % (p.addr2.upper(),
@@ -170,7 +170,7 @@ class ChanSniffer():
                             self.fixtype('ap',p)
                         self.adddev(p)
                     else:
-                        self.addseen(p.addr2, p)
+                        self.addseen(p)
             if p.type == 2:
                 if p.addr2 not in self.peers or (p.addr1 not in self.peers and p.addr1.lower() != 'ff:ff:ff:ff:ff:ff'):
                     if p.addr2 not in self.peers:
@@ -179,20 +179,18 @@ class ChanSniffer():
                     elif p.addr1 not in self.peers[p.addr2].get('peers',[]):
                         self.addpeer(p.addr2, p.addr1, p)
                     elif self.peers[p.addr2]['seen'][-1]['ts']+0.5<time.time():
-                        self.addseen(p.addr2, p)
+                        self.addseen(p)
                     if p.addr1 not in self.peers and p.addr1.lower() != 'ff:ff:ff:ff:ff:ff':
                         t = self.guesstype(p.addr2, p)
                         self.newpeer(p.addr1, [p.addr2], t, p)
                     elif p.addr1.lower() != 'ff:ff:ff:ff:ff:ff' and p.addr2 not in self.peers[p.addr1].get('peers',[]):
                         self.addpeer(p.addr1, p.addr2, p)
-                    elif p.addr1.lower() != 'ff:ff:ff:ff:ff:ff' and self.peers[p.addr1]['seen'][-1]['ts']+0.5<time.time():
-                        self.addseen(p.addr1, p)
                     #print "<con> %s %s <-> %s %s" % (p.addr2, self.peers[p.addr2], p.addr1, self.peers[p.addr1])
 
                     # deauth to see roles?
                     #sendp(RadioTap()/Dot11(type=0,subtype=12,addr1=p.addr2,addr2=p.addr3,addr3=p.addr3)/Dot11Deauth())
                 else:
-                    self.addseen(p.addr2, p)
+                    self.addseen(p)
 
             if self.lastseen and self.timeout and self.lastseen+self.timeout<time.time():
                 self.end_sniffing=True
