@@ -191,6 +191,8 @@ class ChanSniffer():
 
                     # deauth to see roles?
                     #sendp(RadioTap()/Dot11(type=0,subtype=12,addr1=p.addr2,addr2=p.addr3,addr3=p.addr3)/Dot11Deauth())
+                else:
+                    self.addseen(p.addr2, p)
 
             if self.lastseen and self.timeout and self.lastseen+self.timeout<time.time():
                 self.end_sniffing=True
@@ -227,8 +229,7 @@ class ChanSniffer():
             vendor = ''
         if len(vendor)>20:
             vendor = "%s..." % vendor[:20]
-        return "%s %s %-23s %s %s" % (' ' * 30,
-                                      k,
+        return "%s %-23s %s %s" % (k,
                                       vendor,
                                       self.rfstats(v['seen']),
                                       ', '.join(v.get('ssids',[])))
@@ -246,12 +247,12 @@ class ChanSniffer():
                 vendor = "%s..." % vendor[:20]
             res.append("AP %-30s %s %-23s %s" % (', '.join(v.get('ssids',[])), k, vendor, self.rfstats(v['seen'])))
             for client in sorted(v.get('peers',[]), lambda _,v1: len(self.peers[v1].get('ssids',[])) ,reverse=True):
-                res.append("   %s" % self.print_client(client, self.peers[client]))
+                res.append("   %-30s %s" % (', '.join(v.get('ssids',[])), self.print_client(client, self.peers[client])))
                 shown.add(client)
 
         for k, v in self.peers.items():
             if v['type']!='client' or k in shown: continue
-            res.append("CL %s" % self.print_client(k,v))
+            res.append("CL %s %s" % (' '*30, self.print_client(k,v)))
 
         for k, v in self.peers.items():
             if v['type']!='unknown': continue
@@ -269,5 +270,4 @@ if __name__ == "__main__":
     for freq in sorted(iwrange.frequencies):
         #if freq > 3000000000: continue
         cs.run(freq="%.3fGHz" % (freq/1000000000.0),timeout=23)
-    print >>sys.stderr, '-' * 90
     print cs.display().encode('utf8')
