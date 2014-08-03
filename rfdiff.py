@@ -27,7 +27,8 @@ def load(fn):
                         int(stats[idx+12:idx+16].strip()),      # min
                         int(stats[idx+17:idx+21].strip()),      # avg
                         int(stats[idx+22:idx+24].strip()),      # spread
-                        stats.decode('utf8')[idx+32:].strip(),  # attempts
+                        stats[idx+32:idx+36].strip(),           # flags
+                        stats.decode('utf8')[idx+36:].strip(),  # attempts
                         line
                         )
     return res
