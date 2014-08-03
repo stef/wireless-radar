@@ -48,11 +48,11 @@ replacing <device> with wlan0 or mon0 depending on your setup.
 
 should result in output like this:
 ```
-typ AP SSID*                      MAC               vendor                  channels              cnt  max  min  avg  sp rssi   attempts
+typ AP SSID*                      MAC               vendor                  channels              cnt  max  min  avg  sp rssi   flg attempts
 AP 'TP-LINK_ffffff'               ff:ff:ff:ff:ff:ff TP-LINK TECHNOLOGIES    [3-7,9,11          ] 3511  -36  -80  -40 44 [███  ]
-                                  ff:ff:ff:ff:ff:ff Apple, Inc.             [6                 ]   15  -73 -100  -84 27 [▊    ] 'TP-LINK_ffffff'
+                                  ff:ff:ff:ff:ff:ff Apple, Inc.             [6                 ]   15  -73 -100  -84 27 [▊    ]     'TP-LINK_ffffff'
 AP 'WifiZone1234567'              ff:ff:ff:ff:ff:ff Routerboard.com         [11                ]  178  -90  -94  -92  4 [█▌   ]
-CL                                ff:ff:ff:ff:ff:ff Samsung Electronics     [3,9               ]   12  -81  -90  -89  9 [██▋  ]'ap1', ''
+CL                                ff:ff:ff:ff:ff:ff Samsung Electronics     [3,9               ]   12  -81  -90  -89  9 [██▋  ]     'ap1', ''
 ```
 
 where the first column denotes
@@ -71,6 +71,7 @@ for APs this is followed by the AP ESSID, and then for all device types
  - average signal,
  - difference between strongest and weakest signal,
  - 5 char graphical signal strength indicator.
+ - optional flags (C= wireless camera, D=drone)
 
 For client devices this is followed by a list of ESSIDs the device
 tried to associate with.
@@ -278,3 +279,8 @@ python bprox.py
 
 rfdiff takes two output files from wprox and compares them while
 ignoring insignificant differences, see the source.
+
+to run consecutive wproxy scans with a diff to the previous scan can be achieved by:
+```
+prev=logs/w$(ls logs/w* | tail -1 | cut -dw -f2); date=$(date +%Y%m%d%H%M); python wprox.py mon0 >logs/w$date ; ./rfdiff.py $prev logs/w$date
+```
