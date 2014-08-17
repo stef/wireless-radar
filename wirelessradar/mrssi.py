@@ -103,6 +103,9 @@ class MacRSSI():
                 rbar = bar(100+rssi, 100, self.hist_size)
                 print "\r%-4s %s%s| %s        " % (rssi, rbar,' '*(40-len(rbar)), sparkline(self.hist,self.hist_size)),
 
-if __name__ == "__main__":
+def main():
     cs=MacRSSI(sys.argv[1], sys.argv[2], sys.argv[3])
     cs.run()
+
+if __name__ == "__main__":
+    main()

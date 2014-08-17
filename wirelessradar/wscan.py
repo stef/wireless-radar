@@ -285,7 +285,7 @@ class Scanner():
         self.movetoy(0)
         self.movetox(0)
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv)>1:
         if sys.argv[1]=='reset':
             s=Scanner(interface)
@@ -313,4 +313,6 @@ if __name__ == "__main__":
         s=Scanner(interface)
         print >>sys.stderr, 'dir', 'number of APs'
         s.fasth(c=5, steps=199, sweeps=2, cb=s.apCount)
-
+    
+if __name__ == "__main__":
+    main()

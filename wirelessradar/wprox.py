@@ -208,7 +208,7 @@ class ChanSniffer():
             if self.lastseen and self.timeout and self.lastseen+self.timeout<time.time():
                 self.end_sniffing=True
             if self.verbose and self.lastshown+2<time.time():
-                print >>sys.stderr, '-' * 133
+                print >>sys.stderr, '-' * 138
                 print >>sys.stderr, self.display()
                 print >>sys.stderr, "listening on %s chan: %s (%s)" % (self.interface, chanmap[self.freq[0]+self.freq[2:5]], self.freq)
                 self.lastshown = time.time()
@@ -306,6 +306,7 @@ flagmap={"00:02:D1": "C", # vivotek ip cam
          "AC:CC:8E": "C", # axis
          "00:1A:07": "C", # arecont
          "00:0F:7C": "C", # acti
+         "00:1D:1A": "C", # ovislink
          # drone vendors
          '90:03:B7': "D", # parrot
          'A0:14:3D': "D", # parrot
@@ -320,15 +321,18 @@ flagmap36={"00:50:C2:A9:8": "C", # sentry360
            "00:50:C2:3B:6": "C", # arecont
 }
 
-if __name__ == "__main__":
+def main():
     iwrange = Iwrange(sys.argv[1])
     if iwrange.errorflag:
         print (iwrange.errorflag, iwrange.error)
         sys.exit(1)
 
     cs=ChanSniffer(sys.argv[1])
-    #cs.run(freq=chan2freq(11),timeout=3)
     for freq in sorted(iwrange.frequencies):
         #if freq > 3000000000: continue
+        #print str(freq/1000000), chanmap[str(freq/1000000)]
         cs.run(freq="%.3fGHz" % (freq/1000000000.0),timeout=23)
     print cs.display().encode('utf8')
+
+if __name__ == "__main__":
+    main()

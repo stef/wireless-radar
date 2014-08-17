@@ -9,17 +9,6 @@ import sys
 import struct, bluetooth
 import bluetooth._bluetooth as bluez
 
-def readlines(filename, empty_lines = False):
-  "Read all lines from a text file"
-  result = []
-  with open(filename) as f:
-    for line in f.readlines():
-      line = line.strip()
-      if line or empty_lines:
-        result.append(line)
-    f.close()
-  return result
-
 class MajorDeviceClasses(object):
   UNKNOWN = 0
   COMPUTER = 1
@@ -67,27 +56,6 @@ class ServiceDeviceClasses(object):
   }
 
 class BluetoothSupport(object):
-  def __init__(self):
-    # Load classes from file FILE_BT_CLASSES
-    self.classes = {}
-    for line in readlines('classes.txt'):
-      # Skip comments
-      if '#' in line:
-        line = line.split('#', 1)[0]
-      # Skip empty lines
-      line = line.strip()
-      if line:
-        # File format: Major class | Minor class | PNG Image | Description
-        major_class, minor_class, image_path, description = line.split(' | ', 3)
-        major_class = int(major_class)
-        minor_class = int(minor_class)
-        image_path = image_path.strip()
-        # New major class
-        if not self.classes.has_key(major_class):
-          self.classes[major_class] = {}
-        # Add minor class with image and description
-        self.classes[major_class][minor_class] = (image_path, description)
-
   def get_device_name(self, address):
     "Retrieve device name"
     return bluetooth.lookup_name(address)
@@ -117,7 +85,6 @@ class BluetoothSupport(object):
       if service_class & service:
         services.append(description)
     return services
-btq = BluetoothSupport()
 
 def printpacket(pkt):
     for c in pkt:
@@ -181,6 +148,7 @@ def write_inquiry_mode(sock, mode):
     return 0
 
 def device_inquiry_with_with_rssi(sock):
+    btq = BluetoothSupport()
     # save current filter
     old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 14)
 
@@ -242,32 +210,36 @@ def device_inquiry_with_with_rssi(sock):
 
     return results
 
-dev_id = 0
-try:
-    sock = bluez.hci_open_dev(dev_id)
-except:
-    print("error accessing bluetooth device...")
-    sys.exit(1)
-
-try:
-    mode = read_inquiry_mode(sock)
-except Exception as e:
-    print("error reading inquiry mode.  ")
-    print("Are you sure this a bluetooth 1.2 device?")
-    print(e)
-    sys.exit(1)
-#print("current inquiry mode is %d" % mode)
-
-if mode != 1:
-    print("writing inquiry mode...")
+def main():
+    dev_id = 0
     try:
-        result = write_inquiry_mode(sock, 1)
+        sock = bluez.hci_open_dev(dev_id)
+    except:
+        print("error accessing bluetooth device...")
+        sys.exit(1)
+
+    try:
+        mode = read_inquiry_mode(sock)
     except Exception as e:
-        print("error writing inquiry mode.  Are you sure you're root?")
+        print("error reading inquiry mode.  ")
+        print("Are you sure this a bluetooth 1.2 device?")
         print(e)
         sys.exit(1)
-    if result != 0:
-        print("error while setting inquiry mode")
-    print("result: %d" % result)
+    #print("current inquiry mode is %d" % mode)
 
-device_inquiry_with_with_rssi(sock)
+    if mode != 1:
+        print("writing inquiry mode...")
+        try:
+            result = write_inquiry_mode(sock, 1)
+        except Exception as e:
+            print("error writing inquiry mode.  Are you sure you're root?")
+            print(e)
+            sys.exit(1)
+        if result != 0:
+            print("error while setting inquiry mode")
+        print("result: %d" % result)
+
+    device_inquiry_with_with_rssi(sock)
+
+if __name__ == "__main__":
+  main()
