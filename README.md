@@ -7,6 +7,10 @@ wireless-radar comes with a few tools:
  - bprox a Bluetooth device discoverer
  - rfdiff to diff the outputs of wprox scans
 
+## Installation
+
+    pip install wirelessradar
+
 Since wireless-radar tools involve manipulating network devices and
 setting promiscuous mode, these need to be either run as root, or you
 can create a copy of your python executable and set capabilities to
@@ -27,9 +31,10 @@ channels and their users. It allows for selecting a more quiet channel
 for your own network, discovering less congested access points at
 conferences, and generally map the wifi spectrum.
 
-wprox has the following dependencies:
+wprox has the following dependencies which are automatically handled
+by the setup script:
 
-    pip install scapy netaddr git+https://github.com/pingflood/pythonwifi.git
+    scapy netaddr git+https://github.com/pingflood/pythonwifi.git
 
 before you run, you must set your wlan device to monitor mode:
 
@@ -260,10 +265,9 @@ In any case you get this output, where the colums are the following:
 
 ## bprox
 
-bprox listens for bluetooth devices in your vicinity and reports them back.
-bprox depends on pybluez:
-
-    pip install pybluez
+bprox listens for bluetooth devices in your vicinity and reports them
+back.  bprox depends on pybluez which is automatically handled by the
+setup script.
 
 the output contains the MAC address, the RSSI, the device class in
 hex, the device name, the device type, the advertised services, and
