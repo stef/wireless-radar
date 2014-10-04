@@ -26,6 +26,9 @@ connect to, or communicating with APs, and APs advertising themselves
 or communicating with clients. It also collects the ESSIDS of access
 points the clients try to connect to (affects mostly Apple products).
 
+screenshot of wprox output:
+https://raw.githubusercontent.com/stef/wireless-radar/master/wprox.png
+
 Using wprox it is possible to have a more granular look into all
 channels and their users. It allows for selecting a more quiet channel
 for your own network, discovering less congested access points at
