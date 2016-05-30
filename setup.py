@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "wireless-radar",
-    version = "0.2",
+    version = "0.2.2",
     author = "Stefan Marsiske",
     author_email = "s@ctrlc.hu",
     description = ("various tools to map the wireless environment"),
@@ -29,7 +29,7 @@ setup(
           ],
        },
     long_description=read('README.md'),
-    install_requires = ("scapy", "netaddr", "python_wifi==0.5.0", "pybluez"),
+    install_requires = ("scapy", "netaddr", "python_wifi>=0.5.0", "pybluez"),
     dependency_links=[ "git+https://github.com/pingflood/pythonwifi.git#egg=python_wifi-0.5.0", ],
     classifiers = ["Development Status :: 4 - Beta",
                    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
