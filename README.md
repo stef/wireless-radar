@@ -9,7 +9,7 @@ wireless-radar comes with a few tools:
 
 ## Installation
 
-    pip install wirelessradar
+    pip install wireless-radar
 
 Since wireless-radar tools involve manipulating network devices and
 setting promiscuous mode, these need to be either run as root, or you
