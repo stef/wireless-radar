@@ -70,7 +70,8 @@ class ChanSniffer():
             return
         if self.verbose:
             self.lastshown = time.time()
-            print >>sys.stderr, "listening on %s chan: %s (%s)" % (self.interface, chanmap[self.freq[0]+self.freq[2:5]], self.freq)
+            #print >>sys.stderr, "listening on %s chan: %s (%s)" % (self.interface, chanmap[self.freq[0]+self.freq[2:5]], self.freq)
+            print >>sys.stderr, "listening on %s chan: %s (%s)" % (self.interface, freq, freqmap[int(self.freq)])
         while self.lastseen and self.timeout and self.lastseen+self.timeout>time.time() and not self.end_sniffing:
             sniff(iface=self.interface, prn=self.handler, timeout=self.timeout, store=0, stop_filter=self.stop_sniffing)
         return self.peers
@@ -80,18 +81,18 @@ class ChanSniffer():
 
     def addseen(self, k, p):
         try:
-            self.peers[k]['seen'].append({'chan': chanmap[self.freq[0]+self.freq[2:5]],
+            self.peers[k]['seen'].append({'chan': self.freq,
                                             'ts': time.time(),
                                             'rssi': self.siglevel(p) if self.siglevel(p)!=-256 else -100})
         except:
-            self.peers[k]['seen']= [{'chan': chanmap[self.freq[0]+self.freq[2:5]],
+            self.peers[k]['seen']= [{'chan': self.freq,
                                        'ts': time.time(),
                                        'rssi': self.siglevel(p) if self.siglevel(p)!=-256 else -100}]
 
     def newdev(self, k, t, p):
         self.peers[k] = {'type': t,
                          'ssids': [repr(p.info)],
-                         'seen': [{'chan': chanmap[self.freq[0]+self.freq[2:5]],
+                         'seen': [{'chan': self.freq,
                                    'ts': time.time(),
                                    'rssi': self.siglevel(p) if self.siglevel(p)!=-256 else -100}]}
         if self.timeout: self.lastseen=time.time()
@@ -109,7 +110,7 @@ class ChanSniffer():
     def newpeer(self, peer, other, t, p):
         self.peers[peer] = {'type': t,
                             'peers': other,
-                            'seen': [{'chan': chanmap[self.freq[0]+self.freq[2:5]],
+                            'seen': [{'chan': self.freq,
                                       'ts': time.time(),
                                       'rssi': self.siglevel(p) if self.siglevel(p)!=-256 else -100}]}
         if self.timeout: self.lastseen=time.time()
@@ -210,7 +211,7 @@ class ChanSniffer():
             if self.verbose and self.lastshown+2<time.time():
                 print >>sys.stderr, '-' * 138
                 print >>sys.stderr, self.display()
-                print >>sys.stderr, "listening on %s chan: %s (%s)" % (self.interface, chanmap[self.freq[0]+self.freq[2:5]], self.freq)
+                print >>sys.stderr, "listening on %s chan: %s (%s)" % (self.interface, self.freq, freqmap[int(self.freq)])
                 self.lastshown = time.time()
 
     def stop_sniffing(self, pkt):
@@ -222,7 +223,7 @@ class ChanSniffer():
         mn = min(x['rssi'] for x in data)
         avg = sum(x['rssi'] for x in data) / count
         sprd = mx - mn
-        chan = sorted(set(x['chan'] for x in data))
+        chan = sorted(set(int(x['chan']) for x in data))
         return u"[%-18s] %4s %4s %4s %4s %2s [%-5s]" % (tointrange(chan),
                                                         count,
                                                         mx,
@@ -312,6 +313,7 @@ flagmap={"00:02:D1": "C", # vivotek ip cam
          'A0:14:3D': "D", # parrot
          '00:12:1C': "D", # parrot
          '00:26:7E': "D", # parrot
+         '90:03:b7': "D", # parrot
         }
 
 flagmap36={"00:50:C2:A9:8": "C", # sentry360
@@ -329,9 +331,11 @@ def main():
 
     cs=ChanSniffer(sys.argv[1])
     for freq in sorted(iwrange.frequencies):
-        #if freq > 3000000000: continue
+        #if freq < 3000000000: continue
+        #print 'xxxx', freq
         #print str(freq/1000000), chanmap[str(freq/1000000)]
-        cs.run(freq="%.3fGHz" % (freq/1000000000.0),timeout=23)
+        #cs.run(freq="%.3fGHz" % (freq/1000000000.0),timeout=23)
+        cs.run(freq=str(chanmap[str(freq/1000000)]),timeout=23)
     print cs.display().encode('utf8')
 
 if __name__ == "__main__":
