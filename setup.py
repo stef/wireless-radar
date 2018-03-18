@@ -1,4 +1,4 @@
-#/usr/bin/env python2
+#!/usr/bin/env python2
 import os
 from setuptools import setup
 
@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "wireless-radar",
-    version = "0.2.2",
+    version = "0.2.3",
     author = "Stefan Marsiske",
     author_email = "s@ctrlc.hu",
     description = ("various tools to map the wireless environment"),
