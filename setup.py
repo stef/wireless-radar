@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import os
+import os, sys
 from setuptools import setup
 
 # Utility function to read the README file.
@@ -7,7 +7,10 @@ from setuptools import setup
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname), encoding='UTF-8').read()
+    if sys.version[0] == '3':
+        return open(os.path.join(os.path.dirname(__file__), fname), encoding='UTF-8').read()
+    else:
+        return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
     name = "wireless-radar",
