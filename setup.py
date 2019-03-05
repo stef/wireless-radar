@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "wireless-radar",
-    version = "0.2.3",
+    version = "0.2.3.1",
     author = "Stefan Marsiske",
     author_email = "s@ctrlc.hu",
     description = ("various tools to map the wireless environment"),
